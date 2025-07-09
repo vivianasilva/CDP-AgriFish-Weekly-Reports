@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit3, Eye, ExternalLink, Users, Calendar, Globe, MapPin, Menu, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Plus, Edit3, Eye, ExternalLink, Users, Calendar, Globe, Menu, X } from 'lucide-react';
 
 const CDPWeeklyReports = () => {
   const [currentView, setCurrentView] = useState('public');
@@ -12,7 +12,6 @@ const CDPWeeklyReports = () => {
     pesca: [],
     aquacultura: []
   });
-  const [communitySubmissions, setCommunitySubmissions] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' });
@@ -127,8 +126,6 @@ const CDPWeeklyReports = () => {
         pesca: 'pesca Portugal quotas pescadores sustentável',
         aquacultura: 'aquacultura Portugal criação peixe marisco sustentável'
       };
-      
-      const searchQuery = sectorKeywords[selectedSector];
       
       // In production, this would connect to real news APIs
       // For now, simulate with enhanced mock data
