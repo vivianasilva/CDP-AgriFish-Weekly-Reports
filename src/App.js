@@ -472,13 +472,23 @@ const CDPWeeklyReports = () => {
             )}
           </div>
 
-          <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
+            <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
             <div className="text-center text-xs md:text-sm text-gray-600">
               <p>Este relatório é curado semanalmente pelo Centro de Competência & Desenvolvimento</p>
               <p className="mt-1">Conselho da Diáspora Portuguesa • www.diaspora.gov.pt</p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Floating Login Button */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setCurrentView('login')}
+          className="bg-emerald-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-emerald-700 flex items-center gap-2"
+        >
+          Admin Login
+        </button>
       </div>
     </div>
   );
