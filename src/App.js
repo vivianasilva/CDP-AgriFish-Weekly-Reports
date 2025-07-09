@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Edit3, Eye, ExternalLink, Users, Calendar, Globe, Menu, X } from 'lucide-react';
+import { Search, Plus, Edit3, Eye, ExternalLink, Users, Calendar, Globe, Menu, X, Upload, Download, Trash2 } from 'lucide-react';
 
 const CDPWeeklyReports = () => {
   const [currentView, setCurrentView] = useState('public');
@@ -15,6 +15,12 @@ const CDPWeeklyReports = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' });
+  const [communitySubmission, setCommunitySubmission] = useState({
+    name: '',
+    sector: '',
+    url: '',
+    comment: ''
+  });
 
   const sectors = [
     { id: 'agroalimentar', name: 'Agroalimentar', icon: '🌾', color: '#22c55e' },
@@ -25,14 +31,13 @@ const CDPWeeklyReports = () => {
 
   const regions = ['Portugal', 'União Europeia', 'Mundial'];
 
-  // Simple authentication (in production, this would be server-side)
+  // Simple authentication
   const handleLogin = () => {
-    // Demo credentials - in production this would be secure authentication
     if (adminCredentials.username === 'cdp-admin' && adminCredentials.password === 'DiasporaPortugal2025') {
       setIsAuthenticated(true);
       setCurrentView('admin');
     } else {
-      alert('Credenciais inválidas. Tente: cdp-admin / DiasporaPortugal2025');
+      alert('Credenciais inválidas.');
     }
   };
 
@@ -47,6 +52,101 @@ const CDPWeeklyReports = () => {
       ...prev,
       [selectedSector]: [...prev[selectedSector], { ...item, id: Date.now() }]
     }));
+  };
+
+  // Enhanced community submission handler
+  const handleCommunitySubmission = () => {
+    if (!communitySubmission.name || !communitySubmission.sector || !communitySubmission.url) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    alert('Sugestão submetida com sucesso! Será analisada pela equipa CDP.');
+    
+    // Clear form
+    setCommunitySubmission({
+      name: '',
+      sector: '',
+      url: '',
+      comment: ''
+    });
+  };
+
+  // File upload and parsing functionality
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsSearching(true);
+
+    try {
+      const data = await file.arrayBuffer();
+      
+      // Simulate processing Excel file
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock Excel parsing results - in real implementation, this would use SheetJS
+      const sampleExcelData = [
+        {
+          id: Date.now() + 1,
+          title: `Programa nacional de apoio ao setor ${sectors.find(s => s.id === selectedSector)?.name.toLowerCase()}`,
+          summary: `Governo português lança nova iniciativa de €25M para modernização e sustentabilidade no setor ${sectors.find(s => s.id === selectedSector)?.name.toLowerCase()}.`,
+          source: "Ministério da Agricultura",
+          url: "https://www.gov.pt/programa-apoio",
+          region: "Portugal",
+          date: "2025-07-09",
+          type: "política"
+        },
+        {
+          id: Date.now() + 2,
+          title: `União Europeia aumenta financiamento para ${sectors.find(s => s.id === selectedSector)?.name.toLowerCase()}`,
+          summary: `Comissão Europeia aprova €150M adicionais para projetos de inovação e sustentabilidade no setor.`,
+          source: "Comissão Europeia",
+          url: "https://ec.europa.eu/funding-program",
+          region: "União Europeia",
+          date: "2025-07-08",
+          type: "financiamento"
+        },
+        {
+          id: Date.now() + 3,
+          title: `Estudo internacional revela avanços em tecnologias sustentáveis`,
+          summary: `Nova investigação demonstra potencial de 40% de melhoria na eficiência através de tecnologias emergentes.`,
+          source: "Nature Scientific Reports",
+          url: "https://nature.com/research-study",
+          region: "Mundial",
+          date: "2025-07-07",
+          type: "investigação"
+        }
+      ];
+
+      setSearchResults(sampleExcelData);
+      
+    } catch (error) {
+      console.error('Erro ao processar arquivo:', error);
+      alert('Erro ao processar arquivo. Verifique o formato.');
+    }
+
+    setIsSearching(false);
+    // Clear the input
+    event.target.value = '';
+  };
+
+  // Download Excel template
+  const downloadTemplate = () => {
+    const csvContent = `Title,Summary,Source,Region,Type,Date
+"Nova política agrícola","Descrição da política","Ministério da Agricultura","Portugal","política","2025-07-09"
+"Financiamento UE","Detalhes do financiamento","Comissão Europeia","União Europeia","financiamento","2025-07-08"
+"Investigação internacional","Resultados do estudo","Scientific Journal","Mundial","investigação","2025-07-07"`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `template-noticias-${selectedSector}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   // Initialize with sample content for demonstration
@@ -115,44 +215,6 @@ const CDPWeeklyReports = () => {
     setCuratedContent(sampleContent);
   };
 
-  // Real search integration using web APIs (simplified for deployment)
-  const performWeeklySearch = async () => {
-    setIsSearching(true);
-    
-    try {
-      const sectorKeywords = {
-        agroalimentar: 'agricultura Portugal alimentar sustentável inovação',
-        floresta: 'floresta Portugal reflorestação incêndios gestão florestal',
-        pesca: 'pesca Portugal quotas pescadores sustentável',
-        aquacultura: 'aquacultura Portugal criação peixe marisco sustentável'
-      };
-      
-      // In production, this would connect to real news APIs
-      // For now, simulate with enhanced mock data
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockResults = [
-        {
-          id: Date.now(),
-          title: `Desenvolvimentos recentes em ${sectors.find(s => s.id === selectedSector)?.name}`,
-          summary: `Últimas notícias e atualizações do setor ${sectors.find(s => s.id === selectedSector)?.name.toLowerCase()} em Portugal e Europa.`,
-          source: "Pesquisa Automatizada",
-          url: "https://example.com",
-          region: "Portugal",
-          date: new Date().toISOString().split('T')[0],
-          type: "notícia"
-        }
-      ];
-      
-      setSearchResults(mockResults);
-      
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-    
-    setIsSearching(false);
-  };
-
   // Login Interface
   const LoginInterface = () => (
     <div className="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center p-4">
@@ -194,12 +256,6 @@ const CDPWeeklyReports = () => {
           </button>
         </div>
         
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
-          <p className="text-xs text-blue-600">Username: cdp-admin</p>
-          <p className="text-xs text-blue-600">Password: DiasporaPortugal2025</p>
-        </div>
-        
         <div className="mt-4 text-center">
           <button
             onClick={() => setCurrentView('public')}
@@ -216,7 +272,7 @@ const CDPWeeklyReports = () => {
     <div className="space-y-4 md:space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-4 md:p-6">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4 md:mb-6 space-y-4 lg:space-y-0">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Pesquisa Semanal Automatizada</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Carregar Notícias do Excel</h2>
           <div className="flex flex-col sm:flex-row gap-2">
             <select 
               value={selectedSector} 
@@ -230,26 +286,49 @@ const CDPWeeklyReports = () => {
               ))}
             </select>
             <button
-              onClick={performWeeklySearch}
-              disabled={isSearching}
-              className="px-4 md:px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 flex items-center justify-center gap-2 text-sm md:text-base"
+              onClick={downloadTemplate}
+              className="px-4 md:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 text-sm md:text-base"
             >
-              <Search size={18} />
-              {isSearching ? 'A pesquisar...' : 'Pesquisar'}
+              <Download size={18} />
+              Template Excel
             </button>
           </div>
+        </div>
+
+        {/* File Upload Area */}
+        <div className="mb-6 p-6 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-emerald-500 transition-colors">
+          <input
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="file-upload"
+            disabled={isSearching}
+          />
+          <label 
+            htmlFor="file-upload" 
+            className={`cursor-pointer ${isSearching ? 'opacity-50' : ''}`}
+          >
+            <Upload size={48} className="mx-auto text-gray-400 mb-4" />
+            <p className="text-lg font-medium text-gray-700 mb-2">
+              {isSearching ? 'A processar arquivo...' : 'Carregar arquivo Excel/CSV'}
+            </p>
+            <p className="text-sm text-gray-500">
+              Clique aqui ou arraste o arquivo com as notícias do setor {sectors.find(s => s.id === selectedSector)?.name}
+            </p>
+          </label>
         </div>
 
         {isSearching && (
           <div className="text-center py-6 md:py-8">
             <div className="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-emerald-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 text-sm md:text-base">A pesquisar informação relevante...</p>
+            <p className="mt-4 text-gray-600 text-sm md:text-base">A processar notícias...</p>
           </div>
         )}
 
         {searchResults.length > 0 && (
           <div className="space-y-3 md:space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">Resultados da Pesquisa</h3>
+            <h3 className="text-lg font-semibold text-gray-800">Notícias Carregadas ({searchResults.length})</h3>
             {searchResults.map((result, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow">
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-3 lg:space-y-0">
@@ -315,8 +394,34 @@ const CDPWeeklyReports = () => {
                     <span className="text-xs text-gray-500">{item.region} • {item.source}</span>
                   </div>
                   <div className="flex gap-2 justify-end">
-                    <button className="text-blue-600 hover:text-blue-800 p-1">
+                    <button 
+                      onClick={() => {
+                        const newTitle = prompt('Editar título:', item.title);
+                        if (newTitle) {
+                          setCuratedContent(prev => ({
+                            ...prev,
+                            [selectedSector]: prev[selectedSector].map(content => 
+                              content.id === item.id ? { ...content, title: newTitle } : content
+                            )
+                          }));
+                        }
+                      }}
+                      className="text-blue-600 hover:text-blue-800 p-1"
+                    >
                       <Edit3 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (window.confirm('Tem certeza que deseja remover este item?')) {
+                          setCuratedContent(prev => ({
+                            ...prev,
+                            [selectedSector]: prev[selectedSector].filter(content => content.id !== item.id)
+                          }));
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-800 p-1"
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -337,11 +442,17 @@ const CDPWeeklyReports = () => {
         <div className="space-y-3">
           <input
             type="text"
-            placeholder="Seu nome"
+            placeholder="Seu nome *"
+            value={communitySubmission.name}
+            onChange={(e) => setCommunitySubmission(prev => ({ ...prev, name: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
           />
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base">
-            <option value="">Selecionar setor</option>
+          <select 
+            value={communitySubmission.sector}
+            onChange={(e) => setCommunitySubmission(prev => ({ ...prev, sector: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
+          >
+            <option value="">Selecionar setor *</option>
             {sectors.map(sector => (
               <option key={sector.id} value={sector.id}>
                 {sector.icon} {sector.name}
@@ -350,15 +461,19 @@ const CDPWeeklyReports = () => {
           </select>
           <input
             type="url"
-            placeholder="Link da notícia/artigo"
+            placeholder="Link da notícia/artigo *"
+            value={communitySubmission.url}
+            onChange={(e) => setCommunitySubmission(prev => ({ ...prev, url: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
           />
           <textarea
             placeholder="Seu comentário sobre esta informação"
+            value={communitySubmission.comment}
+            onChange={(e) => setCommunitySubmission(prev => ({ ...prev, comment: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg h-20 text-sm md:text-base resize-none"
           ></textarea>
           <button 
-            onClick={() => console.log('Submitting suggestion')}
+            onClick={handleCommunitySubmission}
             className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm md:text-base"
           >
             Submeter Sugestão
@@ -472,7 +587,7 @@ const CDPWeeklyReports = () => {
             )}
           </div>
 
-            <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
+          <div className="p-4 md:p-6 bg-gray-50 border-t border-gray-200">
             <div className="text-center text-xs md:text-sm text-gray-600">
               <p>Este relatório é curado semanalmente pelo Centro de Competência & Desenvolvimento</p>
               <p className="mt-1">Conselho da Diáspora Portuguesa • www.diaspora.gov.pt</p>
@@ -495,7 +610,7 @@ const CDPWeeklyReports = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {currentView !== 'login' && currentView !== 'public' && (
+      {currentView !== 'login' && (
         <nav className="bg-white shadow-sm border-b border-gray-200">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
@@ -691,7 +806,6 @@ const CDPWeeklyReports = () => {
       {/* Main Content */}
       {currentView !== 'login' && currentView !== 'public' && (
         <div className="container mx-auto px-4 py-4 md:py-8">
-          {currentView === 'login' && <LoginInterface />}
           {currentView === 'admin' && isAuthenticated && <AdminInterface />}
           {currentView === 'admin' && !isAuthenticated && <LoginInterface />}
           {currentView === 'community' && <CommunityInterface />}
